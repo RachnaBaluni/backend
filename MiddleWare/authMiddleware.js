@@ -16,6 +16,7 @@ const MemberPlayer = require("../models/MemberPlayer.model");
  * @param {function} next - The Express next middleware function.
  */
 const authenticateDB = async (req, res, next) => {
+  console.log("COOKIES:", req.cookies);
   let token;
 
   // 1. Check for token in cookies
