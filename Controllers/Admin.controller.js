@@ -11,7 +11,7 @@ const adminLogin = (req, res) => {
       });
       res.cookie("token", token, {
         httpOnly: true,
-        secure: false,
+        secure: true,
         sameSite: "none",
         path: "/",
         maxAge: 1000 * 60 * 60,
