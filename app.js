@@ -1,5 +1,5 @@
 const express = require("express");
-const connectDB = require("./Database/connectDB");
+const connectDB = require("./Database/connectDB.js");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
@@ -10,18 +10,20 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  process.env.ADMIN_URL,
-  "https://api.utennisa.com",
+  "https://frrontend-two.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:3000"
 ];
 
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true); // allow
-    } else {
-      callback(new Error("Not allowed by CORS: " + origin));
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
     }
+
+    return callback(null, true); // 👈 allow all (fix for now)
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
