@@ -76,6 +76,15 @@ connectDB().then(() => {
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server listening on port ${PORT}`);
     console.log("Loaded allowedOrigins:", allowedOrigins);
+    connectDB().then(() => {
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server listening on port ${PORT}`);
+    console.log("Loaded allowedOrigins:", allowedOrigins);
+
+    console.log("ADMIN_LOGIN_USERNAME:", process.env.ADMIN_LOGIN_USERNAME);
+    console.log("ADMIN_LOGIN_PASSWORD:", process.env.ADMIN_LOGIN_PASSWORD);
+  });
+});
   });
 });
 
