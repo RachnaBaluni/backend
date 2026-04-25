@@ -79,3 +79,4 @@ app.use((err, req, res, next) => {
     .status(500)
     .json({ error: "Internal Server Error", details: err.message });
 });
+console.log("Member router loaded");
