@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const allowedOrigins = [
-  "https://frrontend-two.vercel.app",
+  "https://frrontends.vercel.app",
   "http://localhost:5173",
   "http://localhost:3000"
 ];
@@ -29,7 +29,14 @@ const corsOptions = {
 };
 
 // ✅ Use the SAME config for all requests
-app.use(cors(corsOptions));
+app.use(cors({
+  origin: [
+    "https://frrontends.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:3000"
+  ],
+  credentials: true
+}));
 
 const PlayerRouter = require("./Route/Player.route.js");
 const MemberRouter = require("./Route/Member.route.js");
