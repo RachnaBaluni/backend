@@ -5,94 +5,56 @@ const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
 const app = express();
+
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// CORS
 const allowedOrigins = [
   "https://frrontends.vercel.app",
+  "https://admin-liart-iota.vercel.app",
   "http://localhost:5173",
   "http://localhost:3000"
 ];
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
+app.use(cors({
+  origin: function(origin, callback){
+    if(!origin || allowedOrigins.includes(origin)){
+      return callback(null,true);
     }
-
     return callback(new Error("Not allowed by CORS"));
   },
-  credentials: true,
-};
-
-// ✅ Use the SAME config for all requests
-app.use(cors({
-  origin: [
-    "https://frrontends.vercel.app",
-    "http://localhost:5173",
-    "http://localhost:3000"
-  ],
-  credentials: true
+  credentials:true
 }));
 
-const PlayerRouter = require("./Route/Player.route.js");
-const MemberRouter = require("./Route/Member.route.js");
-const EventRouter = require("./Route/Event.route.js");
-const MainEventRouter = require("./Route/MainEvent.route.js");
-const AdminRouter = require("./Route/Admin.route.js");
-const TeamRouter = require("./Route/Team.route.js");
-const NissanDrawsRouter = require("./Route/Nissan_Draws.route.js");
-const TournamentDetailRouter = require("./Route/TournamentDetail.route.js");
-const PricesBenifitRouter = require("./Route/PricesBenifit.route.js");
-const VenueRouter = require("./Route/Venue.route.js");
+// Routes
+app.use("/api/player/", require("./Route/Player.route.js"));
+app.use("/api/events/", require("./Route/Event.route.js"));
+app.use("/api/main-events/", require("./Route/MainEvent.route.js"));
+app.use("/api/tournament-details/", require("./Route/TournamentDetail.route.js"));
+app.use("/api/prices-benifit/", require("./Route/PricesBenifit.route.js"));
+app.use("/api/venue/", require("./Route/Venue.route.js"));
+app.use("/api/admin/", require("./Route/Admin.route.js"));
+app.use("/api/member/", require("./Route/Member.route.js"));
+app.use("/api/team/", require("./Route/Team.route.js"));
+app.use("/api/nissan-draws/", require("./Route/Nissan_Draws.route.js"));
 
-//Player APIs
-app.use("/api/player/", PlayerRouter);
+const PORT = process.env.PORT || 3002;
 
-//Event APIs
-app.use("/api/events/", EventRouter);
-app.use("/api/main-events/", MainEventRouter);
-
-//Event APIs
-app.use("/api/tournament-details/", TournamentDetailRouter);
-app.use("/api/prices-benifit/", PricesBenifitRouter);
-app.use("/api/venue/", VenueRouter);
-
-// Admin APIs
-app.use("/api/admin/", AdminRouter);
-
-app.use("/api/member/", MemberRouter);
-app.use("/api/team/", TeamRouter);
-app.use("/api/nissan-draws/", NissanDrawsRouter);
-
-// Starting the Server
-// Starting the Server
-const PORT = process.env.PORT || process.env.PORT_NUMBER || 3002;
-
+// Start Server
 connectDB().then(() => {
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server listening on port ${PORT}`);
-    console.log("Loaded allowedOrigins:", allowedOrigins);
-    connectDB().then(() => {
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server listening on port ${PORT}`);
-    console.log("Loaded allowedOrigins:", allowedOrigins);
-
-    console.log("ADMIN_LOGIN_USERNAME:", process.env.ADMIN_LOGIN_USERNAME);
-    console.log("ADMIN_LOGIN_PASSWORD:", process.env.ADMIN_LOGIN_PASSWORD);
-  });
-});
-  });
+ app.listen(PORT,"0.0.0.0",()=>{
+   console.log(`Server running on ${PORT}`);
+   console.log("Allowed origins:", allowedOrigins);
+ });
 });
 
-// Global error handler for debugging
-app.use((err, req, res, next) => {
-  console.error("Unhandled error:", err.stack || err);
-  res
-    .status(500)
-    .json({ error: "Internal Server Error", details: err.message });
+// Error Handler
+app.use((err,req,res,next)=>{
+ console.error(err);
+ res.status(500).json({
+   error:"Internal Server Error",
+   details:err.message
+ });
 });
-console.log("Member router loaded");
