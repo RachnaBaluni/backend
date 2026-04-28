@@ -120,7 +120,7 @@ exports.getDrawsByEvent = async (eventId) => {
 };
 
 /* =========================
-   UPDATE DRAW (WINNER PROPAGATION)
+   UPDATE DRAW (PROPAGATION)
    ========================= */
 exports.updateDraw = async (drawId, updateData) => {
   try {
@@ -157,7 +157,6 @@ exports.updateDraw = async (drawId, updateData) => {
           [slotType]: null,
         });
 
-        // cascade clear
         if (nextMatch.Winner) {
           await exports.updateDraw(nextMatch._id, {
             Winner: null,
@@ -174,16 +173,14 @@ exports.updateDraw = async (drawId, updateData) => {
 };
 
 /* =========================
-   🔥 FIXED: UPDATE MATCHUP
+   UPDATE MATCHUP (BYE LOGIC)
    ========================= */
 exports.updateMatchup = async (matchId, teamField, teamId) => {
   try {
     const match = await Nissan_Draws.findById(matchId);
 
-    // update team
     match[teamField] = teamId || null;
 
-    // 🔥 AUTO WINNER LOGIC
     let winner = null;
     let status = "Upcoming";
 
@@ -200,19 +197,17 @@ exports.updateMatchup = async (matchId, teamField, teamId) => {
 
     await match.save();
 
-    // 🔥 propagate
     await exports.updateDraw(matchId, {
       Winner: winner,
       Status: status,
     });
-
   } catch (error) {
     throw new Error(error.message);
   }
 };
 
 /* =========================
-   🔥 FIXED: SWAP MATCHUP
+   SWAP MATCHUP (FINAL FIX)
    ========================= */
 exports.swapMatchup = async (
   sourceMatchId,
@@ -231,9 +226,42 @@ exports.swapMatchup = async (
       [sourceSlotType]: originalTargetTeamId || null,
     });
 
-    // 🔥 IMPORTANT: propagate दोनों matches
-    await exports.updateDraw(sourceMatchId, {});
-    await exports.updateDraw(targetMatchId, {});
+    const sourceMatch = await Nissan_Draws.findById(sourceMatchId);
+    const targetMatch = await Nissan_Draws.findById(targetMatchId);
+
+    // SOURCE BYE LOGIC
+    let sourceWinner = null;
+    let sourceStatus = "Upcoming";
+
+    if (sourceMatch.Team1 && !sourceMatch.Team2) {
+      sourceWinner = sourceMatch.Team1;
+      sourceStatus = "Completed";
+    } else if (sourceMatch.Team2 && !sourceMatch.Team1) {
+      sourceWinner = sourceMatch.Team2;
+      sourceStatus = "Completed";
+    }
+
+    // TARGET BYE LOGIC
+    let targetWinner = null;
+    let targetStatus = "Upcoming";
+
+    if (targetMatch.Team1 && !targetMatch.Team2) {
+      targetWinner = targetMatch.Team1;
+      targetStatus = "Completed";
+    } else if (targetMatch.Team2 && !targetMatch.Team1) {
+      targetWinner = targetMatch.Team2;
+      targetStatus = "Completed";
+    }
+
+    await exports.updateDraw(sourceMatchId, {
+      Winner: sourceWinner,
+      Status: sourceStatus,
+    });
+
+    await exports.updateDraw(targetMatchId, {
+      Winner: targetWinner,
+      Status: targetStatus,
+    });
   } catch (error) {
     throw new Error(error.message);
   }
