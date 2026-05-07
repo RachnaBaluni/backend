@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 // CORS
 const allowedOrigins = [
   "https://frontend1-liart-theta.vercel.app",
-  "https://adminn-ebon.vercel.app",
+  "https://admin-beta-gules.vercel.app",
   "http://localhost:5173",
   "http://localhost:3000"
 ];
