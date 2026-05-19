@@ -3,6 +3,8 @@ const OrderOfPlay = require("../models/OrderOfPlay");
 // ✅ SAVE / UPDATE ORDER OF PLAY
 const saveOrderOfPlay = async (req, res) => {
   try {
+    console.log("BODY:", req.body); // debug
+
     const { eventId, grid } = req.body;
 
     if (!eventId) {
@@ -12,43 +14,53 @@ const saveOrderOfPlay = async (req, res) => {
       });
     }
 
+    if (!grid) {
+      return res.status(400).json({
+        success: false,
+        message: "grid is required"
+      });
+    }
+
     const saved = await OrderOfPlay.findOneAndUpdate(
       { eventId },
       { eventId, grid },
-      { upsert: true, new: true }
+      {
+        upsert: true,
+        new: true
+      }
     );
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: saved
     });
 
   } catch (err) {
-    console.log("OrderOfPlay Save Error:", err);
+    console.log("ORDER OF PLAY ERROR:", err);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: err.message
     });
   }
 };
 
-// ✅ GET ORDER OF PLAY (optional but useful)
+// ✅ GET ORDER OF PLAY
 const getOrderOfPlay = async (req, res) => {
   try {
     const { eventId } = req.params;
 
     const data = await OrderOfPlay.findOne({ eventId });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data
     });
 
   } catch (err) {
-    console.log("OrderOfPlay Get Error:", err);
+    console.log("GET ORDER OF PLAY ERROR:", err);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: err.message
     });
