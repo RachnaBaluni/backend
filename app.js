@@ -39,7 +39,7 @@ app.use("/api/admin/", require("./Route/Admin.route.js"));
 app.use("/api/member/", require("./Route/Member.route.js"));
 app.use("/api/team/", require("./Route/Team.route.js"));
 app.use("/api/nissan-draws/", require("./Route/Nissan_Draws.route.js"));
-
+app.use("/api", require("./Route/OrderOfPlay"));
 const PORT = process.env.PORT || 3002;
 
 // Start Server
