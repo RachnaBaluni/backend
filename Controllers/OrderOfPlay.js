@@ -46,9 +46,14 @@ const saveOrderOfPlay = async (req, res) => {
 // ---------------- GET ----------------
 const getOrderOfPlay = async (req, res) => {
   try {
+
+    console.log("PARAMS =>", req.params);
+
     const data = await OrderOfPlay.findOne({
       eventId: req.params.eventId
     });
+
+    console.log("FOUND =>", data);
 
     return res.json({
       success: true,
@@ -56,15 +61,11 @@ const getOrderOfPlay = async (req, res) => {
     });
 
   } catch (err) {
+    console.log("ERROR =>", err);
+
     return res.status(500).json({
       success: false,
       message: err.message
     });
   }
-};
-
-// ⭐⭐⭐ MOST IMPORTANT PART (FIX)
-module.exports = {
-  saveOrderOfPlay,
-  getOrderOfPlay
 };
