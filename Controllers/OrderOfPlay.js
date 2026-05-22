@@ -1,4 +1,4 @@
-const OrderOfPlay = require("../models/OrderOfPlay");
+const OrderOfPlay = require("../models/OrderOfPlay.model");
 
 // ---------------- SAVE ----------------
 const saveOrderOfPlay = async (req, res) => {
@@ -29,6 +29,7 @@ const saveOrderOfPlay = async (req, res) => {
         new: true
       }
     );
+    console.log("SAVED =>", saved);
 
     return res.json({
       success: true,
