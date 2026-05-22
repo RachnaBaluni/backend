@@ -1,65 +1,60 @@
 const OrderOfPlay = require("../models/OrderOfPlay");
 
-// ✅ SAVE / UPDATE ORDER OF PLAY
+// ---------------- SAVE ----------------
 const saveOrderOfPlay = async (req, res) => {
   try {
-    console.log("BODY:", req.body); // debug
-
-    const { eventId, grid } = req.body;
+    const eventId = req.body?.eventId;
+    const playDate = req.body?.playDate;
+    const grid = req.body?.grid;
 
     if (!eventId) {
       return res.status(400).json({
         success: false,
-        message: "eventId is required"
-      });
-    }
-
-    if (!grid) {
-      return res.status(400).json({
-        success: false,
-        message: "grid is required"
+        message: "eventId missing"
       });
     }
 
     const saved = await OrderOfPlay.findOneAndUpdate(
-      { eventId },
-      { eventId, grid },
+      {
+        eventId,
+        playDate
+      },
+      {
+        eventId,
+        playDate,
+        grid
+      },
       {
         upsert: true,
         new: true
       }
     );
 
-    return res.status(200).json({
+    return res.json({
       success: true,
       data: saved
     });
 
   } catch (err) {
-    console.log("ORDER OF PLAY ERROR:", err);
-
     return res.status(500).json({
       success: false,
       message: err.message
     });
   }
 };
-
-// ✅ GET ORDER OF PLAY
+// ---------------- GET ----------------
 const getOrderOfPlay = async (req, res) => {
   try {
-    const { eventId } = req.params;
+    const data = await OrderOfPlay.findOne({
+      eventId: req.params.eventId
+    });
 
-    const data = await OrderOfPlay.findOne({ eventId });
-
-    return res.status(200).json({
+    return res.json({
       success: true,
       data
     });
 
   } catch (err) {
-    console.log("GET ORDER OF PLAY ERROR:", err);
-
     return res.status(500).json({
       success: false,
       message: err.message
@@ -67,6 +62,7 @@ const getOrderOfPlay = async (req, res) => {
   }
 };
 
+// ⭐⭐⭐ MOST IMPORTANT PART (FIX)
 module.exports = {
   saveOrderOfPlay,
   getOrderOfPlay

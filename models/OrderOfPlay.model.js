@@ -5,10 +5,17 @@ const OrderOfPlaySchema = new mongoose.Schema({
     type: String,
     required: true
   },
+
+  playDate: {
+    type: String,
+    required: true
+  },
+
   grid: {
     type: Array,
     default: []
   }
+
 }, { timestamps: true });
 
 module.exports = mongoose.model("OrderOfPlay", OrderOfPlaySchema);
