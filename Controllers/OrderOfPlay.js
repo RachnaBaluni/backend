@@ -69,3 +69,7 @@ const getOrderOfPlay = async (req, res) => {
     });
   }
 };
+module.exports = {
+  saveOrderOfPlay,
+  getOrderOfPlay
+};
