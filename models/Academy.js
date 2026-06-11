@@ -49,4 +49,4 @@ const academySchema = new mongoose.Schema(
   },
 );
 
-module.exports = mongoose.model("Academy", academySchema);
+module.exports = mongoose.model("Academy", academySchema, "memberacademies");
