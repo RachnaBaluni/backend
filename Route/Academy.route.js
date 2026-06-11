@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Academy = require("../models/academy");
+const Academy = require("../models/Academy");
 
 // Get all verified academies
 router.get("/", async (req, res) => {
