@@ -6,6 +6,7 @@ const Academy = require("../models/Academy");
 router.get("/", async (req, res) => {
   try {
     const academies = await Academy.find();
+    console.log("Academies count:", academies.length);
 
     res.status(200).json({
       success: true,
