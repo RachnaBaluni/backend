@@ -5,9 +5,7 @@ const Academy = require("../models/Academy");
 // Get all verified academies
 router.get("/", async (req, res) => {
   try {
-    const academies = await Academy.find({
-      status: "Verified",
-    });
+    const academies = await Academy.find();
 
     res.status(200).json({
       success: true,
