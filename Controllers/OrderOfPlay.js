@@ -52,10 +52,9 @@ const getOrderOfPlay = async (req, res) => {
   try {
     console.log("PARAMS =>", req.params);
 
-    const data = await OrderOfPlay.findOne({
+    const data = await OrderOfPlay.find({
       eventId: req.params.eventId,
-    });
-
+    }).sort({ playDate: 1 });
     console.log("FOUND =>", data);
 
     return res.json({
