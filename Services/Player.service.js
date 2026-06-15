@@ -27,7 +27,7 @@ const RegisterPlayer = async (data) => {
       (typeof data[field] === "string" && data[field].trim() === "")
     ) {
       throw new Error(
-        `Please fill all the details. Missing or invalid field: ${field}`
+        `Please fill all the details. Missing or invalid field: ${field}`,
       );
     }
   }
@@ -115,13 +115,13 @@ const RegisterPlayer = async (data) => {
 
     if (!Partner1Team) {
       throw new Error(
-        `Could not find an open team for Partner 1 (${Partner1.name}) in Event 1.`
+        `Could not find an open team for Partner 1 (${Partner1.name}) in Event 1.`,
       );
     }
 
     if (Partner1Team.partner2) {
       throw new Error(
-        `Partner 1 (${Partner1.name}) already has a partner in Event 1.`
+        `Partner 1 (${Partner1.name}) already has a partner in Event 1.`,
       );
     }
   }
@@ -141,13 +141,13 @@ const RegisterPlayer = async (data) => {
 
     if (!Partner2Team) {
       throw new Error(
-        `Could not find an open team for Partner 2 (${Partner2.name}) in Event 2.`
+        `Could not find an open team for Partner 2 (${Partner2.name}) in Event 2.`,
       );
     }
 
     if (Partner2Team.partner2) {
       throw new Error(
-        `Partner 2 (${Partner2.name}) already has a partner in Event 2.`
+        `Partner 2 (${Partner2.name}) already has a partner in Event 2.`,
       );
     }
   }
@@ -234,7 +234,7 @@ const updatePlayer = async (id, data) => {
       data[field] === null
     ) {
       throw new Error(
-        `Please fill all the details. Missing or invalid field: ${field}`
+        `Please fill all the details. Missing or invalid field: ${field}`,
       );
     }
   }
@@ -796,7 +796,7 @@ const updateTeams = async (id, data) => {
                 rank: newRank,
               },
             ],
-            { session }
+            { session },
           );
         }
       } else {
@@ -837,7 +837,7 @@ const updateTeams = async (id, data) => {
               rank: newRank,
             },
           ],
-          { session }
+          { session },
         );
       }
     };
@@ -949,7 +949,7 @@ const getPlayersWithDetailsFrontend = async () => {
           ? t.partner2?.name || "N/A"
           : t.partner1?.name || "N/A";
     }
-
+    /*
     finalPlayersList.push({
       name: player.name,
       event1,
@@ -960,6 +960,30 @@ const getPlayersWithDetailsFrontend = async () => {
       //dob: "This is Working",
       dob: player.dob ? String(new Date(player.dob).getFullYear()) : null, // Only Year
       city: player.city,
+    });
+    */
+    finalPlayersList.push({
+      _id: player._id,
+
+      name: player.name,
+
+      event1,
+      event1Partner,
+      event2,
+      event2Partner,
+
+      whatsappNumber: player.whatsappNumber,
+      dob: player.dob,
+      city: player.city,
+
+      shirtSize: player.shirtSize,
+      shortSize: player.shortSize,
+      foodPref: player.foodPref,
+      stay: player.stay,
+
+      feePaid: player.feePaid,
+      feePaidAdmin: player.feePaidAdmin,
+      transactionDetails: player.transactionDetails,
     });
   }
 
