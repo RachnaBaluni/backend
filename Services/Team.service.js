@@ -1,7 +1,20 @@
 const Team = require("../models/Team.model");
-
+const Nissan_Draws = require("../models/Nissan_Draw.model");
 exports.updateTeamRankingService = async (orderedTeams) => {
   try {
+    // Get first team to identify the event
+    const firstTeam = await Team.findById(orderedTeams[0]);
+
+    // Check if draw already exists for this event
+    const drawExists = await Nissan_Draws.findOne({
+      Event: firstTeam.eventId,
+    });
+
+    if (drawExists) {
+      throw new Error(
+        "Draw has already been created for this category. Ranking cannot be updated.",
+      );
+    }
     const promises = orderedTeams.map((teamId, index) => {
       return Team.findByIdAndUpdate(teamId, { rank: index + 1 });
     });

@@ -64,8 +64,8 @@ const updateEvent = async (req, res) => {
 const deleteEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const teamExists = await Team.findOne({ eventId: id });
 
+    const teamExists = await Team.findOne({ eventId: id });
     if (teamExists) {
       return res.status(400).json({
         success: false,
