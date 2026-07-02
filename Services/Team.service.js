@@ -1,5 +1,5 @@
 const Team = require("../models/Team.model");
-const Nissan_Draws = require("../models/Nissan_Draw.model");
+const Nissan_Draws = require("../models/Nissan_Draws.model");
 exports.updateTeamRankingService = async (orderedTeams) => {
   try {
     // Get first team to identify the event
