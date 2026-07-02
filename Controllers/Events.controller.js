@@ -5,34 +5,28 @@ const getAllEvents = async (req, res) => {
     const events = await eventService.getAllEventsService();
     res.status(200).json({ success: true, data: events });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error fetching events.",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching events.",
+      error: error.message,
+    });
   }
 };
 
 const createEvent = async (req, res) => {
   try {
     const newEvent = await eventService.createEventService(req.body);
-    res
-      .status(201)
-      .json({
-        success: true,
-        data: newEvent,
-        message: "Event created successfully.",
-      });
+    res.status(201).json({
+      success: true,
+      data: newEvent,
+      message: "Event created successfully.",
+    });
   } catch (error) {
-    res
-      .status(400)
-      .json({
-        success: false,
-        message: "Error creating event.",
-        error: error.message,
-      });
+    res.status(400).json({
+      success: false,
+      message: "Error creating event.",
+      error: error.message,
+    });
   }
 };
 
@@ -53,27 +47,33 @@ const updateEvent = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Event not found." });
     }
-    res
-      .status(200)
-      .json({
-        success: true,
-        data: updatedEvent,
-        message: "Event updated successfully.",
-      });
+    res.status(200).json({
+      success: true,
+      data: updatedEvent,
+      message: "Event updated successfully.",
+    });
   } catch (error) {
-    res
-      .status(400)
-      .json({
-        success: false,
-        message: "Error updating event.",
-        error: error.message,
-      });
+    res.status(400).json({
+      success: false,
+      message: "Error updating event.",
+      error: error.message,
+    });
   }
 };
 
 const deleteEvent = async (req, res) => {
   try {
     const { id } = req.params;
+    const teamExists = await Team.findOne({ eventId: id });
+
+    if (teamExists) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "This event is already used in the View Player List. It cannot be deleted.",
+      });
+    }
+
     const deletedEvent = await eventService.deleteEventService(id);
     if (!deletedEvent) {
       return res
@@ -84,13 +84,11 @@ const deleteEvent = async (req, res) => {
       .status(200)
       .json({ success: true, message: "Event deleted successfully." });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error deleting event.",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error deleting event.",
+      error: error.message,
+    });
   }
 };
 
