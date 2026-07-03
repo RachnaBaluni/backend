@@ -282,23 +282,31 @@ exports.swapMatchup = async (
 
       order.grid = order.grid.map((row) => {
         return row.map((cell) => {
-          if (!cell || !cell._id) return cell;
+          if (!cell || !cell.match) return cell;
 
-          if (cell._id.toString() === sourceMatchId.toString()) {
+          if (cell.match._id.toString() === sourceMatchId.toString()) {
             changed = true;
+
             return {
               ...cell,
-              Team1: updatedSourceMatch.Team1,
-              Team2: updatedSourceMatch.Team2,
+              match: {
+                ...cell.match,
+                Team1: updatedSourceMatch.Team1,
+                Team2: updatedSourceMatch.Team2,
+              },
             };
           }
 
-          if (cell._id.toString() === targetMatchId.toString()) {
+          if (cell.match._id.toString() === targetMatchId.toString()) {
             changed = true;
+
             return {
               ...cell,
-              Team1: updatedTargetMatch.Team1,
-              Team2: updatedTargetMatch.Team2,
+              match: {
+                ...cell.match,
+                Team1: updatedTargetMatch.Team1,
+                Team2: updatedTargetMatch.Team2,
+              },
             };
           }
 
