@@ -237,16 +237,18 @@ exports.swapMatchup = async (
     await Nissan_Draws.findByIdAndUpdate(sourceMatchId, {
       [sourceSlotType]: originalTargetTeamId || null,
     });
+    const updatedSourceMatch = await Nissan_Draws.findById(sourceMatchId);
+    const updatedTargetMatch = await Nissan_Draws.findById(targetMatchId);
 
     // SOURCE BYE LOGIC
     let sourceWinner = null;
     let sourceStatus = "Upcoming";
 
-    if (sourceMatch.Team1 && !sourceMatch.Team2) {
-      sourceWinner = sourceMatch.Team1;
+    if (updatedSourceMatch.Team1 && !updatedSourceMatch.Team2) {
+      sourceWinner = updatedSourceMatch.Team1;
       sourceStatus = "Completed";
-    } else if (sourceMatch.Team2 && !sourceMatch.Team1) {
-      sourceWinner = sourceMatch.Team2;
+    } else if (updatedSourceMatch.Team2 && !updatedSourceMatch.Team1) {
+      sourceWinner = updatedSourceMatch.Team2;
       sourceStatus = "Completed";
     }
 
@@ -254,11 +256,11 @@ exports.swapMatchup = async (
     let targetWinner = null;
     let targetStatus = "Upcoming";
 
-    if (targetMatch.Team1 && !targetMatch.Team2) {
-      targetWinner = targetMatch.Team1;
+    if (updatedTargetMatch.Team1 && !updatedTargetMatch.Team2) {
+      targetWinner = updatedTargetMatch.Team1;
       targetStatus = "Completed";
-    } else if (targetMatch.Team2 && !targetMatch.Team1) {
-      targetWinner = targetMatch.Team2;
+    } else if (updatedTargetMatch.Team2 && !updatedTargetMatch.Team1) {
+      targetWinner = updatedTargetMatch.Team2;
       targetStatus = "Completed";
     }
 
