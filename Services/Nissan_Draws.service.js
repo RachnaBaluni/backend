@@ -127,7 +127,7 @@ exports.updateDraw = async (drawId, updateData) => {
     const updatedDraw = await Nissan_Draws.findByIdAndUpdate(
       drawId,
       updateData,
-      { new: true }
+      { new: true },
     );
 
     if (!updatedDraw) return null;
@@ -138,8 +138,7 @@ exports.updateDraw = async (drawId, updateData) => {
     const nextStage = `Round ${currentRound + 1}`;
     const nextMatchNumber = Math.ceil(currentMatch.Match_number / 2);
 
-    const slotType =
-      currentMatch.Match_number % 2 !== 0 ? "Team1" : "Team2";
+    const slotType = currentMatch.Match_number % 2 !== 0 ? "Team1" : "Team2";
 
     const nextMatch = await Nissan_Draws.findOne({
       Event: currentMatch.Event,
@@ -215,9 +214,22 @@ exports.swapMatchup = async (
   targetMatchId,
   targetSlotType,
   draggedTeamId,
-  originalTargetTeamId
+  originalTargetTeamId,
 ) => {
   try {
+    const sourceMatch = await Nissan_Draws.findById(sourceMatchId);
+    const targetMatch = await Nissan_Draws.findById(targetMatchId);
+
+    if (
+      sourceMatch.Status === "Completed" ||
+      sourceMatch.Winner ||
+      targetMatch.Status === "Completed" ||
+      targetMatch.Winner
+    ) {
+      throw new Error(
+        "This match has already been completed. Drag and drop is not allowed.",
+      );
+    }
     await Nissan_Draws.findByIdAndUpdate(targetMatchId, {
       [targetSlotType]: draggedTeamId || null,
     });
@@ -225,9 +237,6 @@ exports.swapMatchup = async (
     await Nissan_Draws.findByIdAndUpdate(sourceMatchId, {
       [sourceSlotType]: originalTargetTeamId || null,
     });
-
-    const sourceMatch = await Nissan_Draws.findById(sourceMatchId);
-    const targetMatch = await Nissan_Draws.findById(targetMatchId);
 
     // SOURCE BYE LOGIC
     let sourceWinner = null;
