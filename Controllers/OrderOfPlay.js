@@ -12,6 +12,10 @@ const saveOrderOfPlay = async (req, res) => {
       gridRows: grid?.length,
     });
 
+    console.log("===== GRID SAMPLE START =====");
+    console.dir(grid[0], { depth: null });
+    console.log("===== GRID SAMPLE END =====");
+
     if (!eventId) {
       return res.status(400).json({
         success: false,
