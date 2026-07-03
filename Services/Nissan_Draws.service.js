@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Nissan_Draws = require("../models/Nissan_Draws.model.js");
 const Team = require("../models/Team.model.js");
-
+const OrderOfPlay = require("../models/OrderOfPlay.model");
 /* =========================
    CREATE DRAW
    ========================= */
@@ -273,6 +273,12 @@ exports.swapMatchup = async (
       Winner: targetWinner,
       Status: targetStatus,
     });
+
+    const orderOfPlays = await OrderOfPlay.find({
+      eventId: sourceMatch.Event.toString(),
+    });
+
+    console.log("Order Of Play Records:", orderOfPlays.length);
   } catch (error) {
     throw new Error(error.message);
   }
