@@ -35,7 +35,21 @@ exports.getAllTeamsService = async (eventId = null) => {
       .populate({ path: "partner2", select: "name" })
       .populate({ path: "eventId", select: "name" })
       .sort({ rank: "asc" });
-    return teams;
+
+    const teamsWithDrawStatus = await Promise.all(
+      teams.map(async (team) => {
+        const drawExists = await Nissan_Draws.findOne({
+          Event: team.eventId._id,
+        });
+
+        return {
+          ...team.toObject(),
+          drawCreated: !!drawExists,
+        };
+      }),
+    );
+
+    return teamsWithDrawStatus;
   } catch (error) {
     throw new Error(error.message);
   }

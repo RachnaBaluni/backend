@@ -14,7 +14,8 @@ exports.updateTeamRanking = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Error updating team rankings.",
+      message:
+        "Draw has already been created for this category. Ranking cannot be updated.",
       error: error.message,
     });
   }
