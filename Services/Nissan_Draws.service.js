@@ -277,7 +277,39 @@ exports.swapMatchup = async (
     const orderOfPlays = await OrderOfPlay.find({
       eventId: sourceMatch.Event.toString(),
     });
+    for (const order of orderOfPlays) {
+      let changed = false;
 
+      order.grid = order.grid.map((row) => {
+        return row.map((cell) => {
+          if (!cell || !cell._id) return cell;
+
+          if (cell._id.toString() === sourceMatchId.toString()) {
+            changed = true;
+            return {
+              ...cell,
+              Team1: updatedSourceMatch.Team1,
+              Team2: updatedSourceMatch.Team2,
+            };
+          }
+
+          if (cell._id.toString() === targetMatchId.toString()) {
+            changed = true;
+            return {
+              ...cell,
+              Team1: updatedTargetMatch.Team1,
+              Team2: updatedTargetMatch.Team2,
+            };
+          }
+
+          return cell;
+        });
+      });
+
+      if (changed) {
+        await order.save();
+      }
+    }
     console.log("Order Of Play Records:", orderOfPlays.length);
   } catch (error) {
     throw new Error(error.message);
