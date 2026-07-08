@@ -193,12 +193,15 @@ exports.updateDraw = async (drawId, updateData) => {
       );
 
       if (changed) {
-        try {
-          await order.save();
-        } catch (err) {
-          console.log("ORDER SAVE ERROR:", err);
-          throw err;
-        }
+        await OrderOfPlay.findByIdAndUpdate(
+          order._id,
+          {
+            $set: {
+              grid: order.grid,
+            },
+          },
+          { new: true },
+        );
       }
     }
 
