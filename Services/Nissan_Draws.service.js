@@ -193,7 +193,12 @@ exports.updateDraw = async (drawId, updateData) => {
       );
 
       if (changed) {
-        await order.save();
+        try {
+          await order.save();
+        } catch (err) {
+          console.log("ORDER SAVE ERROR:", err);
+          throw err;
+        }
       }
     }
 
