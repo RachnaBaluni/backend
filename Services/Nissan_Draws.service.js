@@ -132,11 +132,10 @@ exports.updateDraw = async (drawId, updateData) => {
 
     if (!updatedDraw) return null;
 
+    const currentMatch = updatedDraw;
     const orderOfPlays = await OrderOfPlay.find({
       eventId: currentMatch.Event.toString(),
     });
-
-    const currentMatch = updatedDraw;
 
     const currentRound = parseInt(currentMatch.Stage.replace("Round ", ""));
     const nextStage = `Round ${currentRound + 1}`;
