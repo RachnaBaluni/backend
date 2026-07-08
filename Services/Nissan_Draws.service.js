@@ -132,6 +132,10 @@ exports.updateDraw = async (drawId, updateData) => {
 
     if (!updatedDraw) return null;
 
+    const orderOfPlays = await OrderOfPlay.find({
+      eventId: currentMatch.Event.toString(),
+    });
+
     const currentMatch = updatedDraw;
 
     const currentRound = parseInt(currentMatch.Stage.replace("Round ", ""));
@@ -162,6 +166,35 @@ exports.updateDraw = async (drawId, updateData) => {
             Status: "Upcoming",
           });
         }
+      }
+    }
+
+    for (const order of orderOfPlays) {
+      let changed = false;
+
+      order.grid = order.grid.map((row) =>
+        row.map((cell) => {
+          if (!cell?.match) return cell;
+
+          if (cell.match._id.toString() === updatedDraw._id.toString()) {
+            changed = true;
+
+            return {
+              ...cell,
+              match: {
+                ...cell.match,
+                Winner: updatedDraw.Winner,
+                Status: updatedDraw.Status,
+              },
+            };
+          }
+
+          return cell;
+        }),
+      );
+
+      if (changed) {
+        await order.save();
       }
     }
 
