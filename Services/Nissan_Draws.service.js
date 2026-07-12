@@ -124,11 +124,14 @@ exports.getDrawsByEvent = async (eventId) => {
    ========================= */
 exports.updateDraw = async (drawId, updateData) => {
   try {
+    console.log("UPDATE ID:", drawId);
+    console.log("UPDATE DATA:", updateData);
     const updatedDraw = await Nissan_Draws.findByIdAndUpdate(
       drawId,
       updateData,
       { new: true },
     );
+    console.log("AFTER SAVE:", updatedDraw);
 
     if (!updatedDraw) return null;
 
