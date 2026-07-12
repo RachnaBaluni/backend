@@ -139,7 +139,7 @@ exports.updateDraw = async (drawId, updateData) => {
     const orderOfPlays = await OrderOfPlay.find({
       eventId: currentMatch.Event.toString(),
     });
-
+    console.log("ORDER OF PLAY COUNT:", orderOfPlays.length);
     const currentRound = parseInt(currentMatch.Stage.replace("Round ", ""));
     const nextStage = `Round ${currentRound + 1}`;
     const nextMatchNumber = Math.ceil(currentMatch.Match_number / 2);
