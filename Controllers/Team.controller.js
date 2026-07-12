@@ -2,6 +2,7 @@ const {
   updateTeamRankingService,
   getAllTeamsService,
   getPlayerTeamsService,
+  getUnassignedTeamsService,
 } = require("../Services/Team.service");
 
 exports.updateTeamRanking = async (req, res) => {
@@ -64,3 +65,9 @@ exports.getUnassignedTeams = async (req, res) => {
     });
   }
 };
+console.log({
+  updateTeamRanking: typeof exports.updateTeamRanking,
+  getAllTeams: typeof exports.getAllTeams,
+  getPlayerTeams: typeof exports.getPlayerTeams,
+  getUnassignedTeams: typeof exports.getUnassignedTeams,
+});
