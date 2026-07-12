@@ -47,3 +47,20 @@ exports.getPlayerTeams = async (req, res) => {
     });
   }
 };
+exports.getUnassignedTeams = async (req, res) => {
+  try {
+    const { eventId } = req.query;
+
+    const teams = await getUnassignedTeamsService(eventId);
+
+    res.status(200).json({
+      success: true,
+      data: teams,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

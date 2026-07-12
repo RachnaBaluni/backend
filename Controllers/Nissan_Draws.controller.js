@@ -23,7 +23,7 @@ exports.updateDraw = async (req, res) => {
   try {
     const updatedDraw = await drawService.updateDraw(
       req.params.drawId,
-      req.body
+      req.body,
     );
     res.status(200).json({ success: true, data: updatedDraw });
   } catch (error) {
@@ -69,8 +69,22 @@ exports.updateMatchup = async (req, res) => {
 
 exports.swapMatchup = async (req, res) => {
   try {
-    const { sourceMatchId, sourceSlotType, targetMatchId, targetSlotType, draggedTeamId, originalTargetTeamId } = req.body;
-    await drawService.swapMatchup(sourceMatchId, sourceSlotType, targetMatchId, targetSlotType, draggedTeamId, originalTargetTeamId);
+    const {
+      sourceMatchId,
+      sourceSlotType,
+      targetMatchId,
+      targetSlotType,
+      draggedTeamId,
+      originalTargetTeamId,
+    } = req.body;
+    await drawService.swapMatchup(
+      sourceMatchId,
+      sourceSlotType,
+      targetMatchId,
+      targetSlotType,
+      draggedTeamId,
+      originalTargetTeamId,
+    );
     res
       .status(200)
       .json({ success: true, message: "Matchup swapped successfully." });
@@ -78,9 +92,6 @@ exports.swapMatchup = async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 };
-
-
-
 
 /* =========================
    UPDATE MATCH TIME
@@ -155,6 +166,23 @@ exports.getAllDraws = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+exports.replaceBye = async (req, res) => {
+  try {
+    const { matchId, teamField, teamId } = req.body;
+
+    await drawService.replaceBye(matchId, teamField, teamId);
+
+    res.status(200).json({
+      success: true,
+      message: "BYE replaced successfully.",
+    });
+  } catch (error) {
+    res.status(400).json({
       success: false,
       message: error.message,
     });

@@ -68,3 +68,30 @@ exports.getPlayerTeamsService = async (id) => {
     throw new Error(error.message);
   }
 };
+exports.getUnassignedTeamsService = async (eventId) => {
+  try {
+    // Event ki saari registered teams
+    const teams = await Team.find({ eventId })
+      .populate({ path: "partner1", select: "name" })
+      .populate({ path: "partner2", select: "name" });
+
+    // Draw me already use hui teams
+    const draws = await Nissan_Draws.find({ Event: eventId });
+
+    const usedTeamIds = new Set();
+
+    draws.forEach((draw) => {
+      if (draw.Team1) usedTeamIds.add(draw.Team1.toString());
+      if (draw.Team2) usedTeamIds.add(draw.Team2.toString());
+    });
+
+    // Sirf additional teams
+    const availableTeams = teams.filter(
+      (team) => !usedTeamIds.has(team._id.toString()),
+    );
+
+    return availableTeams;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};

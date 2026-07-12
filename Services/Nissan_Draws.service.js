@@ -387,3 +387,32 @@ exports.getAllDraws = async () => {
     throw new Error(error.message);
   }
 };
+
+exports.replaceBye = async (matchId, teamField, teamId) => {
+  try {
+    const match = await Nissan_Draws.findById(matchId);
+
+    if (!match) {
+      throw new Error("Match not found.");
+    }
+
+    // Replace BYE with new team
+    match[teamField] = teamId;
+
+    // Reset winner because now match must be played
+    match.Winner = null;
+    match.Status = "Upcoming";
+
+    await match.save();
+
+    // Remove propagated winner from next round
+    await exports.updateDraw(match._id, {
+      Winner: null,
+      Status: "Upcoming",
+    });
+
+    return match;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};

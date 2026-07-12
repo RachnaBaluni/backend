@@ -6,13 +6,12 @@ const router = express.Router();
 
 router.put("/swap-matchup/", isAdmin, drawController.swapMatchup);
 router.put("/update-matchup/", isAdmin, drawController.updateMatchup);
+router.put("/replace-bye", isAdmin, drawController.replaceBye);
 router.put("/update-order", isAdmin, drawController.updateDrawOrder);
 
 router.post("/", isAdmin, drawController.createDrawforEvent);
 
 router.get("/", drawController.getAllDraws);
-
-
 
 router.get("/:eventId", drawController.getDrawsByEvent);
 router.put("/:drawId", isAdmin, drawController.updateDraw);
