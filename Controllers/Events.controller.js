@@ -33,14 +33,7 @@ const createEvent = async (req, res) => {
 const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const teamExists = await Team.findOne({ eventId: id });
 
-    if (teamExists) {
-      return res.status(400).json({
-        success: false,
-        message: "This category already has players. You cannot edit it.",
-      });
-    }
     const updatedEvent = await eventService.updateEventService(id, req.body);
     if (!updatedEvent) {
       return res
