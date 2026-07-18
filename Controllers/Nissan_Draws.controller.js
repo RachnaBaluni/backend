@@ -10,6 +10,24 @@ exports.createDrawforEvent = async (req, res) => {
   }
 };
 
+exports.resetDraw = async (req, res) => {
+  try {
+    const { eventId } = req.body;
+
+    const result = await drawService.resetDraw(eventId);
+
+    res.status(200).json({
+      success: true,
+      ...result,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 exports.getDrawsByEvent = async (req, res) => {
   try {
     const draws = await drawService.getDrawsByEvent(req.params.eventId);

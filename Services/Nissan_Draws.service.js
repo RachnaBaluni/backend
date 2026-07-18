@@ -416,9 +416,51 @@ exports.replaceBye = async (matchId, teamField, teamId) => {
     throw new Error(error.message);
   }
 };
-exports.deleteDraw = async (drawId) => {
+
+/* =========================
+   RESET DRAW
+   ========================= */
+exports.resetDraw = async (eventId) => {
   try {
-    return await Nissan_Draws.findByIdAndDelete(drawId);
+    const draws = await Nissan_Draws.find({ Event: eventId });
+
+    if (!draws.length) {
+      throw new Error("No draws found for this event.");
+    }
+
+    // Completed matches save kar lo
+    const completedMatches = draws.filter(
+      (match) => match.Status === "Completed" && match.Winner,
+    );
+
+    // Reset only pending matches
+    for (const match of draws) {
+      if (match.Status === "Completed") continue;
+
+      if (match.Stage === "Round 1") {
+        match.Winner = null;
+        match.Status = "Upcoming";
+      } else {
+        match.Team1 = null;
+        match.Team2 = null;
+        match.Winner = null;
+        match.Status = "Upcoming";
+      }
+
+      await match.save();
+    }
+
+    // Re-propagate completed matches
+    for (const match of completedMatches) {
+      await exports.updateDraw(match._id, {
+        Winner: match.Winner,
+        Status: "Completed",
+      });
+    }
+
+    return {
+      message: "Draw reset successfully.",
+    };
   } catch (error) {
     throw new Error(error.message);
   }
