@@ -1,6 +1,8 @@
 const express = require("express");
 console.log("NISSAN DRAW ROUTE LOADED");
 const drawController = require("../Controllers/Nissan_Draws.controller.js");
+console.log(drawController);
+console.log("resetDraw:", typeof drawController.resetDraw);
 const { isAdmin } = require("../MiddleWare/authMiddleware.js");
 
 const router = express.Router();
