@@ -416,3 +416,10 @@ exports.replaceBye = async (matchId, teamField, teamId) => {
     throw new Error(error.message);
   }
 };
+exports.deleteDraw = async (drawId) => {
+  try {
+    return await Nissan_Draws.findByIdAndDelete(drawId);
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
