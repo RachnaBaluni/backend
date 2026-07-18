@@ -11,6 +11,9 @@ exports.createDrawforEvent = async (req, res) => {
 };
 
 exports.resetDraw = async (req, res) => {
+  console.log("RESET API HIT");
+  console.log(req.body);
+
   try {
     const { eventId } = req.body;
 
