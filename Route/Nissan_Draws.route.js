@@ -1,4 +1,5 @@
 const express = require("express");
+console.log("NISSAN DRAW ROUTE LOADED");
 const drawController = require("../Controllers/Nissan_Draws.controller.js");
 const { isAdmin } = require("../MiddleWare/authMiddleware.js");
 
@@ -10,7 +11,7 @@ router.put("/replace-bye", isAdmin, drawController.replaceBye);
 router.put("/update-order", isAdmin, drawController.updateDrawOrder);
 
 router.post("/", isAdmin, drawController.createDrawforEvent);
-
+router.post("/reset", isAdmin, drawController.resetDraw);
 router.get("/", drawController.getAllDraws);
 
 router.get("/:eventId", drawController.getDrawsByEvent);
