@@ -453,6 +453,7 @@ exports.resetDraw = async (eventId) => {
     // Reset only pending matches
     for (const match of draws) {
       if (match.Status === "Completed") continue;
+
       if (match.Stage === "Round 1") {
         match.Winner = null;
         match.Status = "Upcoming";
@@ -482,6 +483,7 @@ exports.resetDraw = async (eventId) => {
       message: "Draw reset successfully.",
     };
   } catch (error) {
+    console.log("RESET DRAW ERROR:", error);
     throw new Error(error.message);
   }
 };
