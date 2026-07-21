@@ -422,77 +422,30 @@ exports.replaceBye = async (matchId, teamField, teamId) => {
    ========================= */
 exports.resetDraw = async (eventId) => {
   try {
-    console.log("🔥 RESET SERVICE STARTED 🔥");
-
     const draws = await Nissan_Draws.find({ Event: eventId });
+
     console.log("TOTAL MATCHES BEFORE RESET:", draws.length);
 
-    draws.forEach((m) => {
-      console.log(
-        "MATCH BEFORE RESET:",
-        m.Match_number,
-        m.Stage,
-        "Status:",
-        m.Status,
-        "Winner:",
-        m.Winner,
-      );
-    });
     if (!draws.length) {
       throw new Error("No draws found for this event.");
     }
 
-    // Completed matches save kar lo
-    const completedMatches = draws.filter(
-      (match) => match.Status === "Completed" && match.Winner,
-    );
-
-    // Reset only pending matches
-
     for (const match of draws) {
-      console.log(
-        "CHECKING MATCH:",
-        match.Match_number,
-        match.Stage,
-        "Status:",
-        match.Status,
-        "Winner:",
-        match.Winner,
-      );
-      if (match.Status === "Completed" || match.Winner) {
-        console.log(
-          "SKIPPED COMPLETED MATCH:",
-          match.Match_number,
-          match.Stage,
-        );
-
+      // Completed matches ko bilkul touch nahi karna
+      if (match.Status === "Completed" && match.Winner) {
+        console.log("KEEP COMPLETED MATCH:", match.Match_number, match.Stage);
         continue;
       }
-      if (match.Stage === "Round 1") {
-        match.Winner = null;
-        match.Status = "Upcoming";
-      } else {
-        match.Team1 = null;
-        match.Team2 = null;
-        match.Winner = null;
-        match.Status = "Upcoming";
-      }
 
-      console.log("RESETTING MATCH:", match.Match_number, match.Stage);
+      // Sirf incomplete matches reset honge
+      console.log("RESET MATCH:", match.Match_number, match.Stage);
+
+      match.Team1 = null;
+      match.Team2 = null;
+      match.Winner = null;
+      match.Status = "Upcoming";
 
       await match.save();
-    }
-
-    // Re-propagate completed matches
-    for (const match of completedMatches) {
-      const currentMatch = await Nissan_Draws.findById(match._id);
-
-      if (!currentMatch) continue;
-
-      await exports.updateDraw(match._id, {
-        Winner: currentMatch.Winner,
-        Status: "Completed",
-      });
     }
 
     return {
