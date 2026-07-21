@@ -446,7 +446,7 @@ exports.resetDraw = async (eventId) => {
       if (match.Team2) remainingTeams.push(match.Team2);
     });
 
-    console.log("Completed:", completedRound1.length);
+    console.log("Completed:", completedMatches.length);
     console.log("Pending:", pendingRound1.length);
     console.log("Remaining Teams:", remainingTeams.length);
 
