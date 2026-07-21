@@ -428,12 +428,9 @@ exports.resetDraw = async (eventId) => {
       throw new Error("No draws found for this event.");
     }
 
-    // Round 1 completed matches
-    const completedRound1 = draws.filter(
-      (match) =>
-        match.Stage === "Round 1" &&
-        match.Status === "Completed" &&
-        match.Winner,
+    //  completed matches
+    const completedMatches = draws.filter(
+      (match) => match.Status === "Completed" && match.Winner,
     );
 
     // Round 1 pending matches
@@ -455,8 +452,7 @@ exports.resetDraw = async (eventId) => {
 
     // Reset only pending matches
     for (const match of draws) {
-      if (match.Status === "Completed" || match.Winner) continue;
-
+      if (match.Status === "Completed") continue;
       if (match.Stage === "Round 1") {
         match.Winner = null;
         match.Status = "Upcoming";
