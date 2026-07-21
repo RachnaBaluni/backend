@@ -446,26 +446,10 @@ exports.resetDraw = async (eventId) => {
       if (match.Team2) remainingTeams.push(match.Team2);
     });
 
-    console.log("PENDING ROUND 1 COUNT:", pendingRound1.length);
+    console.log("Completed:", completedMatches.length);
+    console.log("Pending:", pendingRound1.length);
+    console.log("Remaining Teams:", remainingTeams.length);
 
-    pendingRound1.forEach((match) => {
-      console.log(
-        "PENDING MATCH:",
-        match.Match_number,
-        "Team1:",
-        match.Team1,
-        "Team2:",
-        match.Team2,
-        "Status:",
-        match.Status,
-      );
-    });
-
-    console.log("BEFORE SHUFFLE:", remainingTeams);
-
-    remainingTeams.sort(() => Math.random() - 0.5);
-
-    console.log("AFTER SHUFFLE:", remainingTeams);
     // Reset only pending matches
     for (const match of draws) {
       if (match.Status === "Completed") continue;
