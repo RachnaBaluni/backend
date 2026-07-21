@@ -422,8 +422,22 @@ exports.replaceBye = async (matchId, teamField, teamId) => {
    ========================= */
 exports.resetDraw = async (eventId) => {
   try {
-    const draws = await Nissan_Draws.find({ Event: eventId });
+    console.log("🔥 RESET SERVICE STARTED 🔥");
 
+    const draws = await Nissan_Draws.find({ Event: eventId });
+    console.log("TOTAL MATCHES BEFORE RESET:", draws.length);
+
+    draws.forEach((m) => {
+      console.log(
+        "MATCH BEFORE RESET:",
+        m.Match_number,
+        m.Stage,
+        "Status:",
+        m.Status,
+        "Winner:",
+        m.Winner,
+      );
+    });
     if (!draws.length) {
       throw new Error("No draws found for this event.");
     }
@@ -434,9 +448,26 @@ exports.resetDraw = async (eventId) => {
     );
 
     // Reset only pending matches
-    for (const match of draws) {
-      if (match.Status === "Completed" || match.Winner) continue;
 
+    for (const match of draws) {
+      console.log(
+        "CHECKING MATCH:",
+        match.Match_number,
+        match.Stage,
+        "Status:",
+        match.Status,
+        "Winner:",
+        match.Winner,
+      );
+      if (match.Status === "Completed" || match.Winner) {
+        console.log(
+          "SKIPPED COMPLETED MATCH:",
+          match.Match_number,
+          match.Stage,
+        );
+
+        continue;
+      }
       if (match.Stage === "Round 1") {
         match.Winner = null;
         match.Status = "Upcoming";
@@ -446,6 +477,8 @@ exports.resetDraw = async (eventId) => {
         match.Winner = null;
         match.Status = "Upcoming";
       }
+
+      console.log("RESETTING MATCH:", match.Match_number, match.Stage);
 
       await match.save();
     }
