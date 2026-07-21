@@ -435,7 +435,7 @@ exports.resetDraw = async (eventId) => {
 
     // Reset only pending matches
     for (const match of draws) {
-      if (match.Status === "Completed") continue;
+      if (match.Status === "Completed" || match.Winner) continue;
 
       if (match.Stage === "Round 1") {
         match.Winner = null;
@@ -452,8 +452,12 @@ exports.resetDraw = async (eventId) => {
 
     // Re-propagate completed matches
     for (const match of completedMatches) {
+      const currentMatch = await Nissan_Draws.findById(match._id);
+
+      if (!currentMatch) continue;
+
       await exports.updateDraw(match._id, {
-        Winner: match.Winner,
+        Winner: currentMatch.Winner,
         Status: "Completed",
       });
     }
