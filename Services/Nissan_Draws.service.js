@@ -468,19 +468,23 @@ exports.resetDraw = async (eventId) => {
     console.log("AFTER SHUFFLE:", remainingTeams);
     // Reset only pending matches
     for (const match of draws) {
-      if (match.Status === "Completed") continue;
+      // Completed matches ko kuch nahi karna
+      if (match.Status === "Completed") {
+        continue;
+      }
 
+      // Round 1 ke incomplete matches reset karne hain
       if (match.Stage === "Round 1") {
         match.Winner = null;
         match.Status = "Upcoming";
-      } else {
-        match.Team1 = null;
-        match.Team2 = null;
-        match.Winner = null;
-        match.Status = "Upcoming";
+
+        await match.save();
       }
 
-      await match.save();
+      // Round 2, Semi, Final ke incomplete matches delete karne hain
+      else {
+        await Nissan_Draws.findByIdAndDelete(match._id);
+      }
     }
 
     // Re-propagate completed matches
