@@ -428,89 +428,31 @@ exports.resetDraw = async (eventId) => {
       throw new Error("No draws found for this event.");
     }
 
-    // Completed matches save kar lo
-    const completedMatches = draws.filter(
-      (match) => match.Status === "Completed" && match.Winner,
+    // Round 1 completed matches
+    const completedRound1 = draws.filter(
+      (match) =>
+        match.Stage === "Round 1" &&
+        match.Status === "Completed" &&
+        match.Winner,
     );
 
-    const usedTeamIds = [];
+    // Round 1 pending matches
+    const pendingRound1 = draws.filter(
+      (match) => match.Stage === "Round 1" && match.Status !== "Completed",
+    );
 
-    completedMatches.forEach((match) => {
-      if (match.Team1) usedTeamIds.push(match.Team1.toString());
-      if (match.Team2) usedTeamIds.push(match.Team2.toString());
+    // Pending teams collect karo
+    let remainingTeams = [];
+
+    pendingRound1.forEach((match) => {
+      if (match.Team1) remainingTeams.push(match.Team1);
+      if (match.Team2) remainingTeams.push(match.Team2);
     });
 
-    console.log("USED TEAMS:", usedTeamIds);
+    console.log("Completed:", completedRound1.length);
+    console.log("Pending:", pendingRound1.length);
+    console.log("Remaining Teams:", remainingTeams.length);
 
-    const teams = await Team.find({ eventId }).sort({ rank: "asc" });
-
-    const remainingTeams = teams.filter(
-      (team) => !usedTeamIds.includes(team._id.toString()),
-    );
-
-    console.log(
-      "REMAINING TEAMS:",
-      remainingTeams.map((t) => t._id.toString()),
-    );
-
-    function buildBracketSlots(n) {
-      if (n === 1) return [1];
-      const half = buildBracketSlots(n / 2);
-      const mirror = half.map((x) => n + 1 - x);
-      const out = [];
-      for (let i = 0; i < half.length; i++) {
-        out.push(half[i]);
-        out.push(mirror[i]);
-      }
-      return out;
-    }
-
-    const numTeams = remainingTeams.length;
-
-    const bracketSize = Math.pow(2, Math.ceil(Math.log2(numTeams)));
-
-    const slots = buildBracketSlots(bracketSize);
-
-    console.log("SLOTS:", slots);
-
-    let newMatches = [];
-
-    for (let i = 0; i < slots.length; i += 2) {
-      const seedA = slots[i];
-      const seedB = slots[i + 1];
-
-      const teamA = seedA <= numTeams ? remainingTeams[seedA - 1] : null;
-      const teamB = seedB <= numTeams ? remainingTeams[seedB - 1] : null;
-
-      newMatches.push({
-        Team1: teamA,
-        Team2: teamB,
-      });
-    }
-
-    console.log("NEW MATCHES:", newMatches);
-
-    console.log("NEW MATCHES:", newMatches);
-
-    // 👇 YAHAN ADD KARNA HAI
-    const pendingRound1Matches = draws
-      .filter(
-        (match) =>
-          match.Stage === "Round 1" &&
-          !(match.Status === "Completed" && match.Winner),
-      )
-      .sort((a, b) => a.Match_number - b.Match_number);
-
-    console.log("Pending Round 1:", pendingRound1Matches.length);
-
-    for (let i = 0; i < pendingRound1Matches.length; i++) {
-      pendingRound1Matches[i].Team1 = newMatches[i]?.Team1?._id || null;
-      pendingRound1Matches[i].Team2 = newMatches[i]?.Team2?._id || null;
-      pendingRound1Matches[i].Winner = null;
-      pendingRound1Matches[i].Status = "Upcoming";
-
-      await pendingRound1Matches[i].save();
-    }
     // Reset only pending matches
     for (const match of draws) {
       if (match.Status === "Completed" || match.Winner) continue;
