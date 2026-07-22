@@ -498,39 +498,41 @@ exports.resetDraw = async (eventId) => {
     }
 
     // =====================================================
-    // STEP 1: LOCK COMPLETED MATCHES
+    // STEP 1: GET COMPLETED ROUND 1 MATCHES
     // =====================================================
-
-    const completedMatches = draws.filter(
-      (match) => match.Status === "Completed" && match.Winner,
-    );
-
-    console.log(
-      "COMPLETED MATCHES:",
-      completedMatches.map((match) => ({
-        id: match._id,
-        stage: match.Stage,
-        matchNumber: match.Match_number,
-        winner: match.Winner,
-      })),
-    );
-
-    // =====================================================
-    // STEP 2: COLLECT ONLY PENDING TEAMS FROM ROUND 1
-    // =====================================================
-
-    let pendingTeams = [];
 
     const round1Matches = draws
       .filter((match) => match.Stage === "Round 1")
       .sort((a, b) => a.Match_number - b.Match_number);
 
-    for (const match of round1Matches) {
-      // Do not touch teams from completed matches
-      if (match.Status === "Completed") {
-        continue;
-      }
+    const completedMatches = round1Matches.filter(
+      (match) => match.Status === "Completed" && match.Winner,
+    );
 
+    // Store completed match IDs so they are never modified
+    const completedMatchIds = new Set(
+      completedMatches.map((match) => match._id.toString()),
+    );
+
+    console.log(
+      "COMPLETED MATCHES:",
+      completedMatches.map((match) => ({
+        matchNumber: match.Match_number,
+        winner: match.Winner.toString(),
+      })),
+    );
+
+    // =====================================================
+    // STEP 2: COLLECT TEAMS FROM PENDING MATCHES
+    // =====================================================
+
+    let pendingTeams = [];
+
+    const pendingMatches = round1Matches.filter(
+      (match) => !completedMatchIds.has(match._id.toString()),
+    );
+
+    for (const match of pendingMatches) {
       if (match.Team1) {
         pendingTeams.push(match.Team1);
       }
@@ -541,44 +543,88 @@ exports.resetDraw = async (eventId) => {
     }
 
     console.log(
-      "PENDING TEAMS BEFORE SHUFFLE:",
-      pendingTeams.map((id) => id.toString()),
+      "OLD PENDING TEAMS:",
+      pendingTeams.map((team) => team.toString()),
     );
 
     // =====================================================
-    // STEP 3: SHUFFLE PENDING TEAMS
+    // STEP 3: SHUFFLE UNTIL OLD PAIRINGS ARE NOT REPEATED
     // =====================================================
 
-    for (let i = pendingTeams.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
+    const oldPairings = new Set();
 
-      [pendingTeams[i], pendingTeams[j]] = [pendingTeams[j], pendingTeams[i]];
+    for (const match of pendingMatches) {
+      if (match.Team1 && match.Team2) {
+        const teamA = match.Team1.toString();
+        const teamB = match.Team2.toString();
+
+        const pairingKey = [teamA, teamB].sort().join("-");
+
+        oldPairings.add(pairingKey);
+      }
+    }
+
+    let newTeams = [...pendingTeams];
+
+    const shuffleTeams = (teams) => {
+      const shuffled = [...teams];
+
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+
+      return shuffled;
+    };
+
+    let attempts = 0;
+
+    while (attempts < 100) {
+      newTeams = shuffleTeams(pendingTeams);
+
+      let hasOldPairing = false;
+
+      for (let i = 0; i < newTeams.length - 1; i += 2) {
+        const teamA = newTeams[i]?.toString();
+        const teamB = newTeams[i + 1]?.toString();
+
+        if (!teamA || !teamB) continue;
+
+        const pairingKey = [teamA, teamB].sort().join("-");
+
+        if (oldPairings.has(pairingKey)) {
+          hasOldPairing = true;
+          break;
+        }
+      }
+
+      if (!hasOldPairing) {
+        break;
+      }
+
+      attempts++;
     }
 
     console.log(
-      "PENDING TEAMS AFTER SHUFFLE:",
-      pendingTeams.map((id) => id.toString()),
+      "NEW SHUFFLED TEAMS:",
+      newTeams.map((team) => team.toString()),
     );
 
     // =====================================================
-    // STEP 4: CREATE NEW PAIRINGS FOR PENDING ROUND 1 MATCHES
+    // STEP 4: UPDATE ONLY PENDING ROUND 1 MATCHES
     // =====================================================
 
-    for (const match of round1Matches) {
-      // Do not modify completed matches
-      if (match.Status === "Completed") {
-        continue;
-      }
-
-      match.Team1 = pendingTeams.shift() || null;
-      match.Team2 = pendingTeams.shift() || null;
+    for (const match of pendingMatches) {
+      match.Team1 = newTeams.shift() || null;
+      match.Team2 = newTeams.shift() || null;
 
       match.Winner = null;
 
       if (match.Team1 && match.Team2) {
         match.Status = "Upcoming";
       } else if (match.Team1 || match.Team2) {
-        // Automatically complete the match if only one team is present (BYE)
+        // Automatically complete single-team matches as BYE
         match.Winner = match.Team1 || match.Team2;
         match.Status = "Completed";
       } else {
@@ -589,21 +635,10 @@ exports.resetDraw = async (eventId) => {
     }
 
     // =====================================================
-    // STEP 5: RESET ALL NEXT ROUND MATCHES
+    // STEP 5: RESET NEXT ROUNDS
     // =====================================================
 
-    const nextRoundMatches = draws
-      .filter((match) => match.Stage !== "Round 1")
-      .sort((a, b) => {
-        const roundA = parseInt(a.Stage.replace("Round ", ""));
-        const roundB = parseInt(b.Stage.replace("Round ", ""));
-
-        if (roundA !== roundB) {
-          return roundA - roundB;
-        }
-
-        return a.Match_number - b.Match_number;
-      });
+    const nextRoundMatches = draws.filter((match) => match.Stage !== "Round 1");
 
     for (const match of nextRoundMatches) {
       match.Team1 = null;
@@ -615,8 +650,7 @@ exports.resetDraw = async (eventId) => {
     }
 
     // =====================================================
-    // STEP 6: PROPAGATE COMPLETED MATCH WINNERS
-    // BACK INTO THE NEXT ROUND
+    // STEP 6: RESTORE COMPLETED WINNERS INTO NEXT ROUND
     // =====================================================
 
     for (const completedMatch of completedMatches) {
@@ -641,7 +675,7 @@ exports.resetDraw = async (eventId) => {
         await nextMatch.save();
 
         console.log(
-          "PRESERVED COMPLETED WINNER:",
+          "COMPLETED WINNER PRESERVED:",
           completedMatch.Winner.toString(),
           "=>",
           nextStage,
@@ -652,7 +686,7 @@ exports.resetDraw = async (eventId) => {
     }
 
     return {
-      message: "Draw reset successfully.",
+      message: "Draw reset successfully with new pairings.",
     };
   } catch (error) {
     console.log("RESET DRAW ERROR:", error);
