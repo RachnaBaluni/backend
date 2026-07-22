@@ -428,27 +428,27 @@ exports.resetDraw = async (eventId) => {
       throw new Error("No draws found for this event.");
     }
 
-    //  completed matches
-    const completedMatches = draws.filter(
-      (match) => match.Status === "Completed" && match.Winner,
-    );
+    // //  completed matches
+    // const completedMatches = draws.filter(
+    //   (match) => match.Status === "Completed" && match.Winner,
+    // );
 
-    // Round 1 pending matches
-    const pendingRound1 = draws.filter(
-      (match) => match.Stage === "Round 1" && match.Status !== "Completed",
-    );
+    // // Round 1 pending matches
+    // const pendingRound1 = draws.filter(
+    //   (match) => match.Stage === "Round 1" && match.Status !== "Completed",
+    // );
 
-    // Pending teams collect karo
-    let remainingTeams = [];
+    // // Pending teams collect karo
+    // let remainingTeams = [];
 
-    pendingRound1.forEach((match) => {
-      if (match.Team1) remainingTeams.push(match.Team1);
-      if (match.Team2) remainingTeams.push(match.Team2);
-    });
+    // pendingRound1.forEach((match) => {
+    //   if (match.Team1) remainingTeams.push(match.Team1);
+    //   if (match.Team2) remainingTeams.push(match.Team2);
+    // });
 
-    console.log("Completed:", completedMatches.length);
-    console.log("Pending:", pendingRound1.length);
-    console.log("Remaining Teams:", remainingTeams.length);
+    // console.log("Completed:", completedMatches.length);
+    // console.log("Pending:", pendingRound1.length);
+    // console.log("Remaining Teams:", remainingTeams.length);
 
     // Reset only pending matches
     for (const match of draws) {
@@ -458,8 +458,8 @@ exports.resetDraw = async (eventId) => {
         match.Winner = null;
         match.Status = "Upcoming";
       } else {
-        match.Team1 = null;
-        match.Team2 = null;
+        // match.Team1 = null;
+        // match.Team2 = null;
         match.Winner = null;
         match.Status = "Upcoming";
       }
