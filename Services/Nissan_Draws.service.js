@@ -436,8 +436,6 @@ exports.resetDraw = async (eventId) => {
         match.Winner = null;
         match.Status = "Upcoming";
       } else {
-        match.Team1 = null;
-        match.Team2 = null;
         match.Winner = null;
         match.Status = "Upcoming";
       }
