@@ -497,25 +497,158 @@ exports.resetDraw = async (eventId) => {
       throw new Error("No draws found for this event.");
     }
 
-    // Reset only non-completed matches
-    for (const match of draws) {
-      // Completed match ko bilkul touch nahi karna
+    // =====================================================
+    // STEP 1: LOCK COMPLETED MATCHES
+    // =====================================================
+
+    const completedMatches = draws.filter(
+      (match) => match.Status === "Completed" && match.Winner,
+    );
+
+    console.log(
+      "COMPLETED MATCHES:",
+      completedMatches.map((match) => ({
+        id: match._id,
+        stage: match.Stage,
+        matchNumber: match.Match_number,
+        winner: match.Winner,
+      })),
+    );
+
+    // =====================================================
+    // STEP 2: COLLECT ONLY PENDING TEAMS FROM ROUND 1
+    // =====================================================
+
+    let pendingTeams = [];
+
+    const round1Matches = draws
+      .filter((match) => match.Stage === "Round 1")
+      .sort((a, b) => a.Match_number - b.Match_number);
+
+    for (const match of round1Matches) {
+      // Do not touch teams from completed matches
       if (match.Status === "Completed") {
         continue;
       }
 
-      if (match.Stage === "Round 1") {
-        // Round 1 ki teams preserve rahengi
-        match.Winner = null;
+      if (match.Team1) {
+        pendingTeams.push(match.Team1);
+      }
+
+      if (match.Team2) {
+        pendingTeams.push(match.Team2);
+      }
+    }
+
+    console.log(
+      "PENDING TEAMS BEFORE SHUFFLE:",
+      pendingTeams.map((id) => id.toString()),
+    );
+
+    // =====================================================
+    // STEP 3: SHUFFLE PENDING TEAMS
+    // =====================================================
+
+    for (let i = pendingTeams.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+
+      [pendingTeams[i], pendingTeams[j]] = [pendingTeams[j], pendingTeams[i]];
+    }
+
+    console.log(
+      "PENDING TEAMS AFTER SHUFFLE:",
+      pendingTeams.map((id) => id.toString()),
+    );
+
+    // =====================================================
+    // STEP 4: CREATE NEW PAIRINGS FOR PENDING ROUND 1 MATCHES
+    // =====================================================
+
+    for (const match of round1Matches) {
+      // Do not modify completed matches
+      if (match.Status === "Completed") {
+        continue;
+      }
+
+      match.Team1 = pendingTeams.shift() || null;
+      match.Team2 = pendingTeams.shift() || null;
+
+      match.Winner = null;
+
+      if (match.Team1 && match.Team2) {
         match.Status = "Upcoming";
+      } else if (match.Team1 || match.Team2) {
+        // Automatically complete the match if only one team is present (BYE)
+        match.Winner = match.Team1 || match.Team2;
+        match.Status = "Completed";
       } else {
-        // Next rounds mein teams preserve rahengi
-        // taaki Completed matches ke propagated winners na hatein
-        match.Winner = null;
         match.Status = "Upcoming";
       }
 
       await match.save();
+    }
+
+    // =====================================================
+    // STEP 5: RESET ALL NEXT ROUND MATCHES
+    // =====================================================
+
+    const nextRoundMatches = draws
+      .filter((match) => match.Stage !== "Round 1")
+      .sort((a, b) => {
+        const roundA = parseInt(a.Stage.replace("Round ", ""));
+        const roundB = parseInt(b.Stage.replace("Round ", ""));
+
+        if (roundA !== roundB) {
+          return roundA - roundB;
+        }
+
+        return a.Match_number - b.Match_number;
+      });
+
+    for (const match of nextRoundMatches) {
+      match.Team1 = null;
+      match.Team2 = null;
+      match.Winner = null;
+      match.Status = "Upcoming";
+
+      await match.save();
+    }
+
+    // =====================================================
+    // STEP 6: PROPAGATE COMPLETED MATCH WINNERS
+    // BACK INTO THE NEXT ROUND
+    // =====================================================
+
+    for (const completedMatch of completedMatches) {
+      const currentRound = parseInt(completedMatch.Stage.replace("Round ", ""));
+
+      const nextStage = `Round ${currentRound + 1}`;
+
+      const nextMatchNumber = Math.ceil(completedMatch.Match_number / 2);
+
+      const slotType =
+        completedMatch.Match_number % 2 !== 0 ? "Team1" : "Team2";
+
+      const nextMatch = await Nissan_Draws.findOne({
+        Event: eventId,
+        Stage: nextStage,
+        Match_number: nextMatchNumber,
+      });
+
+      if (nextMatch) {
+        nextMatch[slotType] = completedMatch.Winner;
+
+        await nextMatch.save();
+
+        console.log(
+          "PRESERVED COMPLETED WINNER:",
+          completedMatch.Winner.toString(),
+          "=>",
+          nextStage,
+          nextMatchNumber,
+          slotType,
+        );
+      }
     }
 
     return {
